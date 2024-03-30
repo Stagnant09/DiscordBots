@@ -284,7 +284,7 @@ def main():
         guild = bot.guilds[0]
         all_channels = guild.channels
         emoji1 = discord.utils.get(guild.emojis, name="white_check_mark")
-        emoji2 = discord.utils.get(guild.emojis, name="fockos")
+        emoji2 = discord.utils.get(guild.emojis, name="no")
         if emoji1 == None:
             emoji1 = "✅"
 
@@ -350,13 +350,13 @@ def main():
                 await ch.send("Incorrect!")
                 score -= 1
                 for x in bot.emojis:
-                    if x.name == 'fockos':
+                    if x.name == 'no':
                         await message.add_reaction(x)
             else:
                 await ch.send("Invalid!")
                 score -= 1
                 for x in bot.emojis:
-                    if x.name == 'fockos':
+                    if x.name == 'no':
                         await message.add_reaction(x)
             R = new_request(new_args())
             await ch.send(remove_fore(str(R)))
