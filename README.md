@@ -1,5 +1,5 @@
 # Numgame
-A discord bot that provides a very simple game with numbers and operations
+A discord bot that provides a very simple game about numbers and operations
 
 Commands: <br>
 n!start  -> Starts a new game <br>
