@@ -199,11 +199,7 @@ def main():
         print(f'We have logged in as {bot.user}')
         guild = bot.guilds[0]
         all_channels = guild.channels
-        emoji1 = discord.utils.get(guild.emojis, name="white_check_mark")
-        emoji2 = discord.utils.get(guild.emojis, name="fockos")
-        if emoji1 == None:
-            emoji1 = "✅"
-
+        
 
     bot.remove_command('help')
     @bot.command()
@@ -260,19 +256,19 @@ def main():
                 await ch.send("Correct!")
                 score += 1
                 for x in bot.emojis:
-                    if x.name == 'mugshot':
+                    if x.name == 'yes':
                         await message.add_reaction(x)
             elif RES.validity(R.get_args_must(), R.get_args_cant()):
                 await ch.send("Incorrect!")
                 score -= 1
                 for x in bot.emojis:
-                    if x.name == 'fockos':
+                    if x.name == 'no':
                         await message.add_reaction(x)
             else:
                 await ch.send("Invalid!")
                 score -= 1
                 for x in bot.emojis:
-                    if x.name == 'fockos':
+                    if x.name == 'no':
                         await message.add_reaction(x)
             R = new_request(new_args())
             await ch.send(remove_fore(str(R)))
