@@ -248,7 +248,7 @@ def main():
             elif RES.validity(R.get_args_must(), R.get_args_cant()):
                 await ch.send("Incorrect!")
                 score -= 1
-                message.add_reaction(bot.get_emoji("fockos"))
+                message.add_reaction(bot.get_emoji("focus"))
             else:
                 await ch.send("Invalid!")
                 score -= 1
