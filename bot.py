@@ -47,9 +47,59 @@ class Response():
         for char in rules_must:
             if char not in self.text_og:
                 return False
+            if char == "+":
+                if self.text_og.count("+") < 1:
+                    return False
+            if char == "-":
+                if self.text_og.count("-") < 1:
+                    return False
+            if char == "*":
+                if self.text_og.count("*") < 1:
+                    return False
+            if char == "/":
+                if self.text_og.count("/") < 1:
+                    return False
+            if char == "^":
+                if self.text_og.count("^") < 1:
+                    return False
+            if char == "sqrt":
+                if self.text_og.count("sqrt") < 1:
+                    return False
+            if char == "log":
+                if self.text_og.count("log") < 1:
+                    return False
+            if char == "!":
+                if self.text_og.count("!") < 1:
+                    return False
+            
         for char in rules_cant:
             if char in self.text_og:
                 return False
+            if char == "+":
+                if self.text_og.count("+") > 0:
+                    return False
+            if char == "-":
+                if self.text_og.count("-") > 0:
+                    return False
+            if char == "*":
+                if self.text_og.count("*") > 0:
+                    return False
+            if char == "/":
+                if self.text_og.count("/") > 0:
+                    return False
+            if char == "^":
+                if self.text_og.count("^") > 0:
+                    return False
+            if char == "sqrt":
+                if self.text_og.count("sqrt") > 0:
+                    return False
+            if char == "log":
+                if self.text_og.count("log") > 0:
+                    return False
+            if char == "!":
+                if self.text_og.count("!") > 0:
+                    return False
+
         #Check for non-numerical values around operators of *, +, /, -
         for i in range(len(list(str(self.text_og)))):
             if str(self.text_og)[i] in ["*", "+", "/", "-"]:
@@ -57,6 +107,38 @@ class Response():
                     return False
                 if (not str(self.text_og)[i-1].isdigit() and not str(self.text_og)[i-1]==" ") or (not str(self.text_og)[i+1].isdigit() and not str(self.text_og)[i+1]==" "):
                     return False
+
+        #Check for multiplications with 1 and additions with 0 and 0!, 1!, 1^x, x^1
+        for i in range(len(list(str(self.text_og))) - 1):
+            if str(self.text_og)[i] == "*":
+                if str(self.text_og)[i+1] == "1":
+                    return False
+                if str(self.text_og)[i-1] == "1":
+                    return False
+            if str(self.text_og)[i] == "+":
+                if str(self.text_og)[i+1] == "0":
+                    return False
+                if str(self.text_og)[i-1] == "0":
+                    return False
+            if str(self.text_og)[i] == "/":
+                if str(self.text_og)[i+1] == "1":
+                    return False
+                if str(self.text_og)[i-1] == "1":
+                    return False
+            if str(self.text_og)[i] == "-":
+                if str(self.text_og)[i+1] == "0":
+                    return False
+                if str(self.text_og)[i-1] == "0":
+                    return False
+            if str(self.text_og)[i] == "^":
+                if str(self.text_og)[i+1] == "1":
+                    return False
+                if str(self.text_og)[i-1] == "1":
+                    return False
+            if str(self.text_og)[i] == "!":
+                if str(self.text_og)[i-1] == "1" or str(self.text_og)[i-1] == "0":
+                    return False
+
         return True
             
 
@@ -70,6 +152,8 @@ class Request():
     def __init__(self, args, args_must, args_cant):
         self.value = args[0]
         self.args = args
+        self.args_must = args_must
+        self.args_cant = args_cant
         self.produce(args)
         if "log" in args_must and ("+" in args_cant or "-" in args_cant):
             self.difficulty = "Hard"
@@ -199,7 +283,11 @@ def main():
         print(f'We have logged in as {bot.user}')
         guild = bot.guilds[0]
         all_channels = guild.channels
-        
+        emoji1 = discord.utils.get(guild.emojis, name="white_check_mark")
+        emoji2 = discord.utils.get(guild.emojis, name="fockos")
+        if emoji1 == None:
+            emoji1 = "✅"
+
 
     bot.remove_command('help')
     @bot.command()
@@ -256,19 +344,19 @@ def main():
                 await ch.send("Correct!")
                 score += 1
                 for x in bot.emojis:
-                    if x.name == 'yes':
+                    if x.name == 'mugshot':
                         await message.add_reaction(x)
             elif RES.validity(R.get_args_must(), R.get_args_cant()):
                 await ch.send("Incorrect!")
                 score -= 1
                 for x in bot.emojis:
-                    if x.name == 'no':
+                    if x.name == 'fockos':
                         await message.add_reaction(x)
             else:
                 await ch.send("Invalid!")
                 score -= 1
                 for x in bot.emojis:
-                    if x.name == 'no':
+                    if x.name == 'fockos':
                         await message.add_reaction(x)
             R = new_request(new_args())
             await ch.send(remove_fore(str(R)))
