@@ -27,14 +27,14 @@ def factorial(n):
 def log(base, x):
     return math.log(x, base)
 
-custom_namespace = {"factorial": factorial, "log": log, "sqrt": math.sqrt}
+custom_namespace = {"factorial": factorial, "log": log, "sqrt": math.sqrt, "pow": math.pow}
 
 class Response():
     text = ""
     text_og = ""
     def __init__(self, text):
-        self.text = text
-        self.text_og = text
+        self.text = add_spaces_before_and_after_operators(text)
+        self.text_og = add_spaces_before_and_after_operators(text)
         self.calculate()
     def __str__(self):
         return str(self.text)
@@ -190,11 +190,20 @@ def main():
     bot.load_extension("cogs.requests")
     #Load other
     bot.load_extension("cogs.other")
+    
+    emoji1 = ""
+    emoji2 = ""
+
     @bot.event
     async def on_ready():
         print(f'We have logged in as {bot.user}')
         guild = bot.guilds[0]
         all_channels = guild.channels
+        emoji1 = discord.utils.get(guild.emojis, name="white_check_mark")
+        emoji2 = discord.utils.get(guild.emojis, name="fockos")
+        if emoji1 == None:
+            emoji1 = "✅"
+
 
     bot.remove_command('help')
     @bot.command()
@@ -237,6 +246,12 @@ def main():
         if message.content.startswith("n!score"):
             await bot.process_commands(message)
             return
+        if message.content.startswith("n!stop"):
+            await bot.process_commands(message)
+            return
+        if message.content.startswith("n!help"):
+            await bot.process_commands(message)
+            return
         if game_active:
             #Check if message is a response
             ch = message.channel
@@ -244,15 +259,21 @@ def main():
             if RES.validity(R.get_args_must(), R.get_args_cant()) and math.ceil(float(str(RES))) == math.ceil(float(str(R.value))):
                 await ch.send("Correct!")
                 score += 1
-                message.add_reaction(bot.get_emoji("white_check_mark"))
+                for x in bot.emojis:
+                    if x.name == 'mugshot':
+                        await message.add_reaction(x)
             elif RES.validity(R.get_args_must(), R.get_args_cant()):
                 await ch.send("Incorrect!")
                 score -= 1
-                message.add_reaction(bot.get_emoji("focus"))
+                for x in bot.emojis:
+                    if x.name == 'fockos':
+                        await message.add_reaction(x)
             else:
                 await ch.send("Invalid!")
                 score -= 1
-                message.add_reaction(bot.get_emoji("fockos"))
+                for x in bot.emojis:
+                    if x.name == 'fockos':
+                        await message.add_reaction(x)
             R = new_request(new_args())
             await ch.send(remove_fore(str(R)))
         await bot.process_commands(message)
@@ -290,6 +311,20 @@ def custom_eval(expression):
             
             # Replace the factorial expression with a function call
             parts[i] = parts[i].replace(num + "!", "factorial(" + num + ")")
+
+    for i in range(len(parts)-1):
+        if "^" in parts[i]:
+            # Extract the number before the power symbol
+            num = parts[i].split("^")[0]
+
+            # Extract the number after the power symbol
+            power = parts[i].split("^")[1]
+
+            # Replace the power expression with a function call
+            parts[i] = parts[i].replace(num + "^" + power, "pow(" + num + "," + power + ")")
+
+
+
     
     # Join the modified parts back into a single expression string
     modified_expression = " ".join(parts)
@@ -300,6 +335,19 @@ def reduce_space(expression):
     for i in range(len(expression)-1):
         if exp[i] == " " and exp[i+1] == " ":
             exp[i+1] = ""
+    return "".join(exp)
+
+def add_spaces_before_and_after_operators(expression):
+    #Find "+", "-", "*", "/" operators and add " " around them if this doesn't already exist
+    exp = list(expression)
+    for i in range(len(expression)-1):
+        if exp[i] == "+" or exp[i] == "-" or exp[i] == "*" or exp[i] == "/":
+            if exp[i-1]!= " " and exp[i+1]!= " ":
+                exp[i] = " " + exp[i] + " "
+            elif exp[i-1] == " " and exp[i+1]!= " ":
+                exp[i] = exp[i] + " "
+            elif exp[i-1]!= " " and exp[i+1] == " ":
+                exp[i] = " " + exp[i]
     return "".join(exp)
 
 def remove_fore(expression):
