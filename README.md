@@ -8,4 +8,4 @@ n!score -> Shows the current score <br>
 n!help -> Pops up a help message <br>
 
 Update:
-Added botword.py - a similar bot for a word game with slash commands.
+Added botword.py - a similar bot for a word game with slash commands support.
