@@ -1,16 +1,10 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-import asyncio
 import random
 import os
-import time
-import json
 import requests
-import pytz
-import psutil
 import math
-import re
 import string
 
 def string_to_int_convert(text):
