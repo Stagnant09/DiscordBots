@@ -12,9 +12,27 @@ def string_to_int_convert(text):
     # Essientially a name to id conversion
     n = 0
     i = 1
+    j = 0
+    char_ = [ord(text[0])]
+    start_ = 0
+    end_ = 0
     for char in text:
+        j += 1
+        if ord(char) > char_[-1]:
+            char_.append(ord(char))
+            end_ = j
+        else:
+            char_ = [ord(char)]
+            start_ = j
         n = n + (ord(char) - 96) * i
-        i *= 26
+        i *= 6
+        if char == 'a' or char == 'A' or char == '0' and i == 6**2:
+            n = n + 1
+        if char == 'b' or char == 'B' or char == 'd' or char == 'D' and i == 6**3:
+            n = n + 2
+    n += (sum(char_) + start_ + end_ % 60)
+    #Limit n to its last 5 digits
+    n = n % 10**5
     return n
 
 all_words = []
@@ -124,7 +142,7 @@ def main():
     async def start(ctx):
         global channel_id, games_, requests_
         channel_id = string_to_int_convert(ctx.channel.name)
-        if games_.get(int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))) == None:
+        if games_.get(int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))) == None or games_[int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))] == False:
             games_[int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))] = True
             combo_[int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))] = 0
             print("Addition: " + str(games_))
@@ -132,7 +150,7 @@ def main():
             myrequest = requests_[int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))]
             await ctx.response.send_message("Game started! \n" + myrequest.message())
         else:
-            await ctx.followup.send("Game already started!")
+            await ctx.response.send_message("Game already started!")
 
     @tree.command(name="stop", description="Stop the game!")
     async def stop(ctx):
