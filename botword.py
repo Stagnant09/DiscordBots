@@ -5,7 +5,6 @@ import asyncio
 import random
 import os
 import time
-import datetime
 import json
 import requests
 import pytz
@@ -13,8 +12,6 @@ import psutil
 import math
 import re
 import string
-import warnings
-from colorama import init, Fore, Style
 
 def string_to_int_convert(text):
     # Converts each text to a series of digits based on the characters of the input
