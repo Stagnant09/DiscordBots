@@ -20,10 +20,10 @@ def string_to_int_convert(text):
         j += 1
         if ord(char) > char_[-1]:
             char_.append(ord(char))
-            end_ = j
         else:
             char_ = [ord(char)]
             start_ = j
+        end_ = j
         n = n + (ord(char) - 96) * i
         i *= 6
         if char == 'a' or char == 'A' or char == '0' and i == 6**2:
@@ -96,7 +96,7 @@ class Request():
             self.last = pick_letter_end()
             for word in all_words:
                 if word[0] == self.first and word[len(word) - 1] == self.last:
-                    if self.first == 'z' or self.first == 'x' and random.randint(0, 13) == 1:
+                    if self.first == 'z' or self.first == 'x' and random.randint(0, 13) != 1:
                         continue
                     word_exists = True
     def message(self):
