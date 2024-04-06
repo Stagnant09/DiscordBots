@@ -16,6 +16,16 @@ import string
 import warnings
 from colorama import init, Fore, Style
 
+def string_to_int_convert(text):
+    # Converts each text to a series of digits based on the characters of the input
+    # Essientially a name to id conversion
+    n = 0
+    i = 1
+    for char in text:
+        n = n + (ord(char) - 96) * i
+        i *= 26
+    return n
+
 all_words = []
 #Load words
 with open("words.txt") as f:
@@ -26,10 +36,18 @@ with open("words.txt") as f:
 for i in range(5):
     print(all_words[i])
 
-game_active = False
-combo = 0
-channel_id = 0
-MyRequest = None
+games_ = {
+    # channel-server : true/false
+}
+
+combo_ = {
+    # channel-server : combo
+}
+
+requests_ = {
+    # channel-server : request
+}
+
 s1 = ""
 
 def pick_letter_start():
@@ -69,7 +87,7 @@ class Request():
             self.last = pick_letter_end()
             for word in all_words:
                 if word[0] == self.first and word[len(word) - 1] == self.last:
-                    if self.first == 'z' or self.first == 'x' and random.randint(0, 4) == 1:
+                    if self.first == 'z' or self.first == 'x' and random.randint(0, 13) == 1:
                         continue
                     word_exists = True
     def message(self):
@@ -108,32 +126,37 @@ def main():
     @client.event
     async def on_ready():
         print("Logged in as " + client.user.name)
-        print("ID: " + str(client.user.id))
+        print("id: " + str(client.user.id))
         print("------")
     
     @tree.command(name="start", description="Start the game!")
     async def start(ctx):
-        global game_active, channel_id, MyRequest
-        channel_id = ctx.channel.id
-        if game_active == False:
-            game_active = True
-            MyRequest = new_request()
-            await ctx.response.send_message("Game started! \n" + MyRequest.message())
+        global channel_id, games_, requests_
+        channel_id = string_to_int_convert(ctx.channel.name)
+        if games_.get(int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))) == None:
+            games_[int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))] = True
+            combo_[int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))] = 0
+            print("Addition: " + str(games_))
+            requests_[int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))] = new_request()
+            myrequest = requests_[int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))]
+            await ctx.response.send_message("Game started! \n" + myrequest.message())
         else:
             await ctx.followup.send("Game already started!")
 
     @tree.command(name="stop", description="Stop the game!")
     async def stop(ctx):
-        global game_active
-        if game_active == True:
-            game_active = False
+        global games_
+        if games_[int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))] == True:
+            games_[int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))] = False
+            combo_[int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))] = 0
             await ctx. response.send_message("Game stopped!")
         else:
             await ctx. response.send_message("No game active!")
 
     @tree.command(name="score", description="Get the current combo")
     async def score(ctx):
-        global combo
+        global combo_
+        combo = combo_[int(str(string_to_int_convert(ctx.channel.name)) + str(ctx.guild.id))]
         await ctx. response.send_message("Current combo: " + str(combo))
 
     @tree.command(name="clear", description="Clear the last amount of messages")
@@ -151,28 +174,32 @@ def main():
 
     @client.event
     async def on_message(message):
-        global game_active, channel_id, MyRequest, combo, s1
+        global channel_id, combo_, games_, s1, requests_
         ctx = message.channel
+        myrequest = requests_[int(str(string_to_int_convert(ctx.name)) + str(ctx.guild.id))]
         if message.content.startswith("/start") or message.content.startswith("/stop") or message.content.startswith("/score") or message.content.startswith("/clear") or message.content.startswith("/help") or message.content.startswith("/ping"):
         #    await client.process_commands(message)
             return
-        if game_active == True and message.channel.id == channel_id and message.author.id!= client.user.id:
+        if games_.get(int(str(string_to_int_convert(ctx.name)) + str(ctx.guild.id))) == None:
+            return
+        if games_[int(str(string_to_int_convert(ctx.name)) + str(ctx.guild.id))] == True and message.author.id!= client.user.id:
             R = Response(message.content.lower())
             if R.validate():
-                if R.correctness(MyRequest.first_letter(), MyRequest.last_letter()):
-                    combo += 1
+                if R.correctness(myrequest.first_letter(), myrequest.last_letter()):
+                    combo_[int(str(string_to_int_convert(ctx.name)) + str(ctx.guild.id))] += 1
                     s1 = ""
-                    if combo % 5 == 0:
-                        s1 = "You got a combo of " + str(combo) + "! Great job."
+                    if combo_[int(str(string_to_int_convert(ctx.name)) + str(ctx.guild.id))] % 5 == 0:
+                        s1 = "You got a combo of " + str(combo_[int(str(string_to_int_convert(ctx.name)) + str(ctx.guild.id))]) + "! Great job."
                     await ctx. send("Correct!" + "\n" + str(s1))
                 else:
                     await ctx. send("Incorrect!")
-                    combo = 0
+                    combo_[int(str(string_to_int_convert(ctx.name)) + str(ctx.guild.id))] = 0
             else:
                 await ctx. send("Invalid response!")
-                combo = 0
-            MyRequest = new_request()
-            await ctx. send(MyRequest.message())
+                combo_[int(str(string_to_int_convert(ctx.name)) + str(ctx.guild.id))] = 0
+            requests_[int(str(string_to_int_convert(ctx.name)) + str(ctx.guild.id))] = new_request()
+            myrequest = requests_[int(str(string_to_int_convert(ctx.name)) + str(ctx.guild.id))]
+            await ctx. send(myrequest.message())
 
     @client.event 
     async def on_connect():
